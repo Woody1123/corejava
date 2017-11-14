@@ -1,0 +1,58 @@
+public static void main(String[] args) throws IOException {
+		Iterator<Integer> iter = Stream.iterate(0, n->n+1).limit(10).iterator();
+		while(iter.hasNext()) {
+			System.out.println(iter.next());
+		}
+		Object[] numbers = Stream.iterate(0, n->n+1).limit(10).toArray();
+		//是Object型数组
+		System.out.println("numbers:"+numbers);
+		try {
+			Integer number = (Integer) numbers[0];
+			System.out.println("number:"+number);
+			System.out.println("The following statement throws an exception");
+			Integer[] numbers2 = (Integer[]) numbers;
+		} catch (Exception e) {
+			
+			System.out.println(e);
+		}
+		System.out.println("——————————");
+		Integer[] numbers3 = Stream.iterate(0, n->n+1).limit(10).toArray(Integer[]::new);
+		//是整数型数组
+		System.out.println("Integer array:"+numbers3);
+		Set<String> noVowelSet = noVowels().collect(Collectors.toSet());
+		/*Iterator<String> a = noVowelSet.iterator();
+		while(a.hasNext()) {
+			System.out.println(a.next());
+		}*/
+		show("noVowelSet",noVowelSet);
+		
+		TreeSet<String> noVowelTreeSet = noVowels().collect(Collectors.toCollection(TreeSet::new));
+		show("noVowelTreeSet",noVowelTreeSet);
+		
+		String result = noVowels().limit(10).collect(Collectors.joining());
+		System.out.println("joining:"+result);
+		
+		result = noVowels().limit(10).collect(Collectors.joining(","));
+		System.out.println("joining with commas:"+result);
+		
+		IntSummaryStatistics summary = noVowels().collect(Collectors.summarizingInt(String::length));
+		System.out.println(summary);
+		double averageWordLength = summary.getAverage();
+		double maxWordLength = summary.getMax();
+		System.out.println("Average word length:"+averageWordLength);
+		System.out.println("Max word lenght:"+maxWordLength);
+		System.out.println("foreach:");
+		noVowels().limit(10).forEach(System.out::println);
+	}
+	public static Stream<String> noVowels() throws IOException{
+		String contents = new String(Files.readAllBytes(Paths.get("a.txt")),StandardCharsets.UTF_8);
+		List<String> wordList = Arrays.asList(contents.split("\\PL+"));
+		Stream<String> words = wordList.stream();
+		return words.map(s->s.replaceAll("[aeiouAEIOU]", ""));
+	}
+	public static <T> void show(String label,Set<T> set) {
+		System.out.println(label+":"+set.getClass().getName());
+		System.out.println("["+set.stream().limit(10)
+				.map(Object::toString)
+				.collect(Collectors.joining(","))+"]");
+	}
